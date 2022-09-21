@@ -5,10 +5,20 @@ namespace app\controllers;
 use app\models\Category;
 use app\models\Post;
 use Yii;
+use yii\filters\auth\HttpBasicAuth;
 
 class PostController extends \yii\rest\ActiveController {
 
     public $modelClass = 'app\models\Post';
+
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+        $behaviors['authenticator'] = [
+            'class' => HttpBasicAuth::class,
+        ];
+        return $behaviors;
+    }
 
     public function verbs()
     {
