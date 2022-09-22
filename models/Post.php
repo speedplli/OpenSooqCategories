@@ -7,14 +7,14 @@ use Yii;
 /**
  * This is the model class for table "post".
  *
- * @property int $id
- * @property int|null $category_id
- * @property int|null $sub_category_id
- * @property int|null $price
+ * @property int         $id
+ * @property int|null    $category_id
+ * @property int|null    $sub_category_id
+ * @property int|null    $price
  * @property string|null $mobile
  *
- * @property Category $category
- * @property Category $subCategory
+ * @property Category    $category
+ * @property Category    $subCategory
  */
 class Post extends \yii\db\ActiveRecord
 {
@@ -34,9 +34,14 @@ class Post extends \yii\db\ActiveRecord
         return [
             [['category_id', 'sub_category_id', 'price'], 'integer'],
             [['mobile'], 'string'],
-            ['mobile', 'match', 'pattern' => '^07[789]\d{7}$^'],
+            ['mobile', 'match', 'pattern' => '/^07[789]\d{7}$/'],
             [['category_id'], 'exist', 'skipOnError' => true, 'targetClass' => Category::class, 'targetAttribute' => ['category_id' => 'id']],
             [['sub_category_id'], 'exist', 'skipOnError' => true, 'targetClass' => Category::class, 'targetAttribute' => ['sub_category_id' => 'id']],
+            ['sub_category_id', function ($attribute) {
+                if (!$this->getSubCategory()->where(['id' => $this->category_id])->exist()) {
+                    $this->addError($attribute, 'This sub category dos\'t exists or not child of the parent category');
+                }
+            }]
         ];
     }
 
@@ -72,6 +77,6 @@ class Post extends \yii\db\ActiveRecord
      */
     public function getSubCategory()
     {
-        return $this->hasOne(Category::class, ['parent_id' => 'category_id']);
+        return $this->hasOne(Category::class, ['id' => 'sub_category_id']);
     }
 }
